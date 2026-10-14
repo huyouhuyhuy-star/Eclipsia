@@ -2174,12 +2174,15 @@ function showPull(res){const top=Math.max(...res.map(r=>r.it.rar));const col={3:
    Chiêu được gửi dưới dạng sự kiện; máy kia chạy lại chiêu đó trên "bản sao" của đối thủ.
    Sát thương do máy bị đánh tự tính (ai bị trúng thì người đó trừ máu và báo lại). */
 const FIREBASE_CONFIG={apiKey:"AIzaSyC2TDD2TmTtJPU77lNUQxIRMWI2mBQzz00",authDomain:"gmaesieuhay.firebaseapp.com",databaseURL:"https://gmaesieuhay-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"gmaesieuhay",storageBucket:"gmaesieuhay.firebasestorage.app",messagingSenderId:"302003485152",appId:"1:302003485152:web:d9c75fd733d11d9c065385",measurementId:"G-K5BXDLX2E5"};
-const FB_VER='10.12.2',FB_SRC=[`https://cdn.jsdelivr.net/npm/firebase@${FB_VER}/`,`https://www.gstatic.com/firebasejs/${FB_VER}/`];
+const FB_VER='10.12.5',FB_SRC=[`https://www.gstatic.com/firebasejs/${FB_VER}/`,`https://cdn.jsdelivr.net/npm/firebase@${FB_VER}/`];
 const NET={on:false,stage:'idle',role:null,code:null,remote:null,tgt:null,tgtAt:0,lastSend:0,lastRecv:0,seq:0,offs:[],needAlive:false,match:0,B:null};
 function loadScript(u){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=u;sc.onload=res;sc.onerror=()=>{sc.remove();rej(new Error('load '+u))};document.head.append(sc)})}
 const NET_FB={
- async init(){if(this.db)return;if(!window.firebase||!firebase.database){let ok=false,last;for(const b of FB_SRC){try{if(!window.firebase)await loadScript(b+'firebase-app-compat.js');await loadScript(b+'firebase-database-compat.js');ok=true;break}catch(e){last=e}}if(!ok)throw last||new Error('firebase')}
-  const app=firebase.apps.length?firebase.app():firebase.initializeApp(FIREBASE_CONFIG);this.db=firebase.database(app);
+ async init(){if(this.db&&this.uid)return;if(!window.firebase||!firebase.database||!firebase.auth){let ok=false,last;for(const b of FB_SRC){try{if(!window.firebase)await loadScript(b+'firebase-app-compat.js');if(!firebase.auth)await loadScript(b+'firebase-auth-compat.js');if(!firebase.database)await loadScript(b+'firebase-database-compat.js');ok=true;break}catch(e){last=e}}if(!ok)throw last||new Error('firebase')}
+  const app=firebase.apps.length?firebase.app():firebase.initializeApp(FIREBASE_CONFIG);
+  /* đăng nhập ẩn danh nếu được; mở file trực tiếp (file://) thì Firebase Auth không chạy -> vẫn vào database không cần đăng nhập */
+  this.uid='local';if(location.protocol==='http:'||location.protocol==='https:'){try{const auth=firebase.auth(app);const acc=auth.currentUser?{user:auth.currentUser}:await Promise.race([auth.signInAnonymously(),new Promise((_,rj)=>setTimeout(()=>rj(new Error('auth-timeout')),6000))]);this.uid=acc.user.uid}catch(e){console.warn('Firebase auth bỏ qua:',e&&e.code||e)}}NET.uid=this.uid;
+  this.db=firebase.database(app);
   await Promise.race([this.db.ref('.info/serverTimeOffset').once('value'),new Promise((_,rj)=>setTimeout(()=>rj(new Error('timeout')),9000))])},
  ref(pth){return this.db.ref('eclipsia/'+pth)},
  set(pth,v){return this.ref(pth).set(v)},get(pth){return this.ref(pth).once('value').then(x=>x.val())},
@@ -2204,8 +2207,8 @@ function netOff(){for(const f of NET.offs)try{f()}catch(_){}NET.offs=[]}
 async function netLeave(){const B=NET.B,c=NET.code,r=NET.role;netOff();const was=NET.stage;NET.on=false;NET.stage='idle';NET.tgt=null;
  if(!B||!c)return;try{if(r==='host')await B.remove('rooms/'+c);else{await B.remove('rooms/'+c+'/guest');await B.remove('rooms/'+c+'/s_guest')}}catch(_){}NET.code=null;NET.role=null}
 function netCode(){const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let t='';for(let i=0;i<5;i++)t+=A[Math.random()*A.length|0];return t}
-function netErr(e){const m=String(e&&e.message||e);if(/PERMISSION|permission/.test(m))return'Firebase từ chối quyền đọc/ghi. Vào Realtime Database → Rules và cho phép đường dẫn "eclipsia".';
- if(/load |firebase|timeout/.test(m))return'Không kết nối được máy chủ. Hãy kiểm tra mạng, hoặc mở bản tải về (eclipsia_offline.html) bằng Chrome.';return'Lỗi kết nối: '+m}
+function netErr(e){const m=String(e&&e.message||e),code=String(e&&e.code||'');if(/operation-not-allowed|admin-restricted/.test(code+m))return'Chưa bật đăng nhập ẩn danh. Vào Firebase → Authentication → Sign-in method → bật Anonymous.';if(/network-request-failed/.test(code))return'Không kết nối được máy chủ, hãy kiểm tra mạng.';if(/PERMISSION|permission/.test(m))return'Firebase từ chối quyền đọc/ghi (Rules). Dán lại Rules không cần đăng nhập rồi bấm Publish.';
+ if(/load |firebase|timeout/.test(m))return'Không kết nối được máy chủ. Hãy kiểm tra mạng, hoặc mở bản tải về (eclipsia_offline.html) bằng Chrome.';return'Lỗi kết nối: '+m+(code?' ('+code+')':'')}
 async function netCreate(ui){const B=netB();ui('Đang kết nối máy chủ…');await B.init();await netLeave();NET.B=B;
  const c=netCode();NET.code=c;NET.role='host';NET.stage='wait';NET.match=0;
  await B.remove('rooms/'+c);await B.set('rooms/'+c+'/host',netMe());await B.set('rooms/'+c+'/state','wait');B.onDisc('rooms/'+c);
