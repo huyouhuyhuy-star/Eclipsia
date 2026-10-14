@@ -2204,7 +2204,7 @@ function netB(){return NET.B||(NET.B=/[?&]netmock/.test(location.search)?NET_MOC
 function netMe(){const k=chosen,lv=heroRec(k).lv;return{hero:k,skin:skinOf(k),name:(PD.name||'Lữ Khách').slice(0,16),mh:Math.round(HEROES[k].hp*hpMul(lv)),lm:+dmMul(lv).toFixed(3),lv}}
 const netOther=()=>NET.role==='host'?'guest':'host';
 function netOff(){for(const f of NET.offs)try{f()}catch(_){}NET.offs=[]}
-async function netLeave(){const B=NET.B,c=NET.code,r=NET.role;netOff();const was=NET.stage;NET.on=false;NET.stage='idle';NET.tgt=null;
+async function netLeave(){const B=NET.B,c=NET.code,r=NET.role;netOff();const was=NET.stage;NET.on=false;NET.stage='idle';NET.tgt=null;NET.match=0;
  if(!B||!c)return;try{if(r==='host')await B.remove('rooms/'+c);else{await B.remove('rooms/'+c+'/guest');await B.remove('rooms/'+c+'/s_guest')}}catch(_){}NET.code=null;NET.role=null}
 function netCode(){const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let t='';for(let i=0;i<5;i++)t+=A[Math.random()*A.length|0];return t}
 function netErr(e){const m=String(e&&e.message||e),code=String(e&&e.code||'');if(/operation-not-allowed|admin-restricted/.test(code+m))return'Chưa bật đăng nhập ẩn danh. Vào Firebase → Authentication → Sign-in method → bật Anonymous.';if(/network-request-failed/.test(code))return'Không kết nối được máy chủ, hãy kiểm tra mạng.';if(/PERMISSION|permission/.test(m))return'Firebase từ chối quyền đọc/ghi (Rules). Dán lại Rules không cần đăng nhập rồi bấm Publish.';
@@ -2218,9 +2218,9 @@ async function netJoin(code,ui){const B=netB();code=(code||'').trim().toUpperCas
  ui('Đang tìm phòng…');await B.init();await netLeave();NET.B=B;
  const h=await B.get('rooms/'+code+'/host');if(!h){ui('Không tìm thấy phòng '+code+'.');return}
  const g=await B.get('rooms/'+code+'/guest');if(g){ui('Phòng đã đủ 2 người.');return}
- NET.code=code;NET.role='guest';NET.remote=h;NET.stage='join';await B.remove('rooms/'+code+'/s_guest');await B.remove('rooms/'+code+'/ev_guest');
+ NET.code=code;NET.role='guest';NET.remote=h;NET.stage='join';NET.match=0;await B.remove('rooms/'+code+'/s_guest');await B.remove('rooms/'+code+'/ev_guest');
  await B.set('rooms/'+code+'/guest',netMe());B.onDisc('rooms/'+code+'/guest');B.onDisc('rooms/'+code+'/s_guest');
- NET.offs.push(B.onValue('rooms/'+code+'/state',st=>{if(!st)return;const m=+String(st).split(':')[1]||0;if(m&&m!==NET.match){NET.match=m;NET.stage='play';startOnline()}}));
+ NET.offs.push(B.onValue('rooms/'+code+'/state',st=>{if(!st)return;const m=+String(st).split(':')[1]||0;if(m&&(NET.stage==='join'||m!==NET.match)){NET.match=m;NET.stage='play';startOnline()}}));
  NET.offs.push(B.onValue('rooms/'+code+'/host',hh=>{if(!hh&&NET.stage!=='idle')netGone()}));ui('Đã vào phòng, chờ chủ phòng bắt đầu…')}
 function netRematch(){if(!NET.on||NET.role!=='host')return;NET.match++;NET.B.set('rooms/'+NET.code+'/state','play:'+NET.match);startOnline()}
 function netGone(){if(NET.stage==='idle')return;const wasOn=NET.on;netLeave();if(wasOn||running){running=false;showEnd('ĐỐI THỦ ĐÃ RỜI PHÒNG','Trận đấu kết thúc.',null,[['Về sảnh',toLobby,true]])}else lbToast('Đối thủ đã rời phòng')}
