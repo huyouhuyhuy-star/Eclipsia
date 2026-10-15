@@ -248,14 +248,14 @@ kbd{font-family:var(--display);background:var(--panel);border:1px solid var(--li
 .r3{--rc:var(--r3)}.r4{--rc:var(--r4)}.r5{--rc:var(--r5)}
  #cutin{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
 #cutin .ci-band{position:absolute;overflow:hidden}
-#cutin .ci-lines{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.22) 0 2px,transparent 2px 46px),repeating-linear-gradient(90deg,rgba(255,215,122,.25) 0 1px,transparent 1px 23px);animation:ciLines .35s linear infinite}
+#cutin .ci-lines{position:absolute;inset:0;overflow:hidden;background:repeating-linear-gradient(90deg,rgba(255,255,255,.22) 0 2px,transparent 2px 46px),repeating-linear-gradient(90deg,rgba(255,215,122,.25) 0 1px,transparent 1px 23px);animation:ciLines .35s linear infinite}
 @keyframes ciLines{to{background-position:-92px 0,-46px 0}}
 #cutin .ci-img{position:absolute;filter:drop-shadow(0 0 18px rgba(170,130,255,.9))}
 #cutin .ci-txt{position:absolute;display:flex;flex-direction:column;font-family:var(--display);color:#fff3c8;text-shadow:0 0 12px #8a6cff,0 2px 0 #2a1060}
 #cutin .ci-txt b{letter-spacing:.12em;font-style:italic}#cutin .ci-txt small{font:700 12px var(--body);letter-spacing:.2em;color:#c9a8ff;text-transform:uppercase}
-#cutin.ci-e .ci-band{right:-4%;top:8%;width:min(74%,860px);height:min(30%,230px);transform:skewY(-7deg);background:linear-gradient(90deg,rgba(20,8,60,0),rgba(30,12,80,.92) 22%,rgba(80,40,170,.95));border-top:3px solid #ffd77a;border-bottom:3px solid #ffd77a;box-shadow:0 0 30px rgba(140,100,255,.7);animation:ciE 1.25s cubic-bezier(.2,.8,.2,1) forwards}
-#cutin.ci-e .ci-img{right:2%;top:-22%;height:170%;transform:skewY(7deg);animation:ciEimg 1.25s cubic-bezier(.2,.8,.2,1) forwards}
-#cutin.ci-e .ci-txt{left:22%;top:50%;transform:translateY(-50%) skewY(7deg)}#cutin.ci-e .ci-txt b{font-size:clamp(20px,3.6vw,42px)}
+#cutin.ci-e .ci-band{overflow:visible;right:-4%;top:25%;width:min(74%,860px);height:min(40%,300px);transform:skewY(-7deg);background:linear-gradient(90deg,rgba(20,8,60,0),rgba(30,12,80,.92) 22%,rgba(80,40,170,.95));border-top:3px solid #ffd77a;border-bottom:3px solid #ffd77a;box-shadow:0 0 30px rgba(140,100,255,.7);animation:ciE 1.25s cubic-bezier(.2,.8,.2,1) forwards}
+#cutin.ci-e .ci-img{right:3%;bottom:-6%;height:146%;transform:skewY(7deg);animation:ciEimg 1.25s cubic-bezier(.2,.8,.2,1) forwards}
+#cutin.ci-e .ci-txt{left:14%;top:50%;transform:translateY(-50%) skewY(7deg)}#cutin.ci-e .ci-txt b{font-size:clamp(20px,3.6vw,42px)}
 @keyframes ciE{0%{transform:translateX(105%) skewY(-7deg)}14%{transform:translateX(0) skewY(-7deg)}82%{transform:translateX(-2%) skewY(-7deg);opacity:1}100%{transform:translateX(-40%) skewY(-7deg);opacity:0}}
 @keyframes ciEimg{0%{transform:translateX(40%) skewY(7deg)}20%{transform:translateX(0) skewY(7deg)}100%{transform:translateX(-6%) skewY(7deg)}}
 #cutin.ci-r .ci-bg{position:absolute;inset:0;background:radial-gradient(1.5px 1.5px at 12% 22%,#fff,transparent),radial-gradient(1.5px 1.5px at 72% 14%,#fff,transparent),radial-gradient(2px 2px at 38% 78%,#ffd77a,transparent),radial-gradient(1.5px 1.5px at 86% 64%,#fff,transparent),radial-gradient(1px 1px at 55% 40%,#fff,transparent),radial-gradient(2px 2px at 22% 60%,#c9a8ff,transparent),radial-gradient(ellipse at 62% 48%,rgba(130,80,240,.75),rgba(20,10,60,.92) 55%,rgba(4,2,14,.96));animation:ciRbg 1.9s ease forwards}
